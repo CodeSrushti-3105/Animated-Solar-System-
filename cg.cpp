@@ -1,96 +1,215 @@
+// C program to draw solar system using
+// computer graphics
+#include <conio.h>
+#include <dos.h>
 #include <graphics.h>
-#include <cmath>
-#include <thread>
-#include <chrono>
-
-const int WIDTH = 800;
-const int HEIGHT = 600;
-const float SUN_X = WIDTH / 2.0f;
-const float SUN_Y = HEIGHT / 2.0f - 50; // Elevate the Sun by 50 pixels
-
-// Orbital parameters for planets (semi-major axis, semi-minor axis, speed)
-const float SEMI_MAJOR_AXIS[] = {60.0f, 90.0f, 120.0f, 150.0f, 180.0f, 210.0f, 240.0f, 270.0f};
-const float SEMI_MINOR_AXIS[] = {40.0f, 70.0f, 100.0f, 130.0f, 160.0f, 190.0f, 220.0f, 250.0f};
-
-// Increased speeds for each planet
-const float SPEED[] = {0.4f, 0.32f, 0.24f, 0.2f, 0.16f, 0.12f, 0.08f, 0.04f}; 
-const int NUM_PLANETS = 8;
-
-// Colors for each planet
-const int PLANET_COLORS[] = {BLUE, GREEN, RED, CYAN, MAGENTA, YELLOW, WHITE, LIGHTGRAY};
-
-void drawEllipses() {
-    // Draw static elliptical orbits
-    for (int i = 0; i < NUM_PLANETS; ++i) {
-        setcolor(LIGHTGRAY); // Orbit color
-        for (float theta = 0; theta < 2 * M_PI; theta += 0.01) {
-            int orbitX = static_cast<int>(SUN_X + SEMI_MAJOR_AXIS[i] * cos(theta));
-            int orbitY = static_cast<int>(SUN_Y + SEMI_MINOR_AXIS[i] * sin(theta));
-            putpixel(orbitX, orbitY, LIGHTGRAY); // Draw orbit points
-        }
-    }
+#include <math.h>
+#include <stdio.h>
+ 
+// Function to manipulates the position
+// of planets on the orbit
+void planetMotion(int xrad, int yrad,
+				int midx, int midy,
+				int x[70], int y[70])
+{
+	int i, j = 0;
+ 
+	// Positions of planets in their
+	// corresponding orbits
+	for (i = 360; i > 0; i = i - 6) {
+		x[j] = midx - (xrad * cos((i * 3.14) / 180));
+		y[j++] = midy - (yrad * sin((i * 3.14) / 180));
+	}
+ 
+	return;
 }
-
-void drawSun() {
-    setcolor(YELLOW);
-    circle(SUN_X, SUN_Y, 25); // Draw Sun
-    floodfill(SUN_X, SUN_Y, YELLOW); // Fill Sun
+ 
+// Driver Code
+int main()
+{
+ 
+	// Initialize graphic driver
+	int gdriver = DETECT, gmode, err;
+	int i = 0, midx, midy;
+	int xrad[9], yrad[9], x[9][70], y[9][70];
+	int pos[9], planet[9], tmp;
+ 
+	// Initialize graphics mode by
+	// passing the three arguments
+	// to initgraph()
+ 
+	// &gdriver is the address of gdriver
+	// variable, &gmode is the address of
+	// gmode and "C:\\Turboc3\\BGI" is the
+	// directory path where BGI files
+	// are stored
+	initgraph(&gdriver, &gmode, "");
+	err = graphresult();
+ 
+ 
+ 
+	// Mid positions at x and y-axis
+	midx = getmaxx() - 220;
+	midy = getmaxy() - 150;
+ 
+	// Manipulating radius of all
+	// the nine planets
+	planet[0] = 8;
+	for (i = 1; i < 9; i++) {
+		planet[i] = planet[i - 1] + 1;
+	}
+ 
+	// Offset position for the planets
+	// on their corresponding orbit
+	for (i = 0; i < 9; i++) {
+		pos[i] = i * 6;
+	}
+ 
+	// Orbits for all 9 planets
+	xrad[0] = 70, yrad[0] = 40;
+	for (i = 1; i < 9; i++) {
+		xrad[i] = xrad[i - 1] + 38;
+		yrad[i] = yrad[i - 1] + 20;
+	}
+ 
+	// Positions of planets on their
+	// corresponding orbits
+	for (i = 0; i < 9; i++) {
+		planetMotion(xrad[i], yrad[i],
+					midx, midy, x[i],
+					y[i]);
+	}
+ 
+	while (!kbhit()) {
+ 
+		// Drawing 9 orbits
+		setcolor(WHITE);
+		for (i = 0; i < 9; i++) {
+			setcolor(CYAN);
+			ellipse(midx, midy, 0, 360,
+					xrad[i], yrad[i]);
+		}
+ 
+		// Sun at the mid of solar system
+		outtextxy(midx, midy, " SUN");
+		setcolor(YELLOW);
+		setfillstyle(SOLID_FILL, YELLOW);
+		circle(midx, midy, 30);
+		floodfill(midx, midy, YELLOW);
+ 
+		// Mercury in first orbit
+		setcolor(CYAN);
+ 
+		setfillstyle(SOLID_FILL, CYAN);
+		outtextxy(x[0][pos[0]],
+				y[0][pos[0]],
+				" MERCURY");
+ 
+		pieslice(x[0][pos[0]],
+				y[0][pos[0]],
+				0, 360, planet[0]);
+ 
+		// Venus in second orbit
+		setcolor(GREEN);
+		setfillstyle(SOLID_FILL, GREEN);
+		outtextxy(x[1][pos[1]],
+				y[1][pos[1]],
+				" VENUS");
+		pieslice(x[1][pos[1]],
+				y[1][pos[1]],
+				0, 360, planet[1]);
+ 
+		// Earth in third orbit
+		setcolor(BLUE);
+		setfillstyle(SOLID_FILL, BLUE);
+		outtextxy(x[2][pos[2]],
+				y[2][pos[2]],
+				" EARTH");
+		pieslice(x[2][pos[2]],
+				y[2][pos[2]],
+				0, 360, planet[2]);
+ 
+		// Mars in fourth orbit
+		setcolor(RED);
+		setfillstyle(SOLID_FILL, RED);
+		outtextxy(x[3][pos[3]],
+				y[3][pos[3]],
+				" MARS");
+		pieslice(x[3][pos[3]],
+				y[3][pos[3]],
+				0, 360, planet[3]);
+ 
+		// Jupiter in fifth orbit
+		setcolor(BROWN);
+		setfillstyle(SOLID_FILL, BROWN);
+		outtextxy(x[4][pos[4]],
+				y[4][pos[4]],
+				" JUPITER");
+		pieslice(x[4][pos[4]],
+				y[4][pos[4]],
+				0, 360, planet[4]);
+ 
+		// Saturn in sixth orbit
+		setcolor(LIGHTGRAY);
+		setfillstyle(SOLID_FILL, LIGHTGRAY);
+		outtextxy(x[5][pos[5]],
+				y[5][pos[5]],
+				" SATURN");
+		pieslice(x[5][pos[5]],
+				y[5][pos[5]],
+				0, 360, planet[5]);
+ 
+		// Uranus in seventh orbit
+		setcolor(LIGHTGREEN);
+		setfillstyle(SOLID_FILL, LIGHTGREEN);
+				outtextxy (x [6] [pos [6]],
+						y [6] [pos [6]],
+						"URANUS");
+				pieslice (x [6] [pos [6]],
+						y [6] [pos [6]],
+						0, 360, planet [6]);
+ 
+		// Neptune in eighth orbit
+		setcolor (LIGHTBLUE);
+		setfillstyle (SOLID_FILL, LIGHTBLUE);
+		outtextxy (x [7] [pos [7]],
+				y [7] [pos [7]],
+				" NEPTUNE");
+		pieslice (x [7] [pos [7]],
+				y [7] [pos [7]],
+				0, 360, planet [7]);
+ 
+		// Pluto in ninth orbit
+		setcolor (LIGHTRED);
+		setfillstyle (SOLID_FILL, LIGHTRED);
+		outtextxy (x [8] [pos [8]],
+				y [8] [pos [8]],
+				" PLUTO");
+		pieslice (x [8] [pos [8]],
+				y [8] [pos [8]],
+				0, 360, planet [8]);
+ 
+		// Checking for one complete
+		// rotation
+		for (i = 0; i < 9; i++) {
+			if (pos[i] <= 0) {
+				pos[i] = 59;
+			}
+			else {
+				pos[i] = pos[i] - 1;
+			}
+		}
+ 
+		// Sleep for 100 milliseconds
+		delay (100);
+ 
+		// Clears graphic screen
+		cleardevice ();
+	}
+ 
+	// Deallocate memory allocated
+	// for graphic screen
+	closegraph();
+ 
+	return 0;
 }
-
-void drawPlanet(int planetIndex, float angle) {
-    // Calculate planet position using elliptical orbits
-    int planetX = static_cast<int>(SUN_X + SEMI_MAJOR_AXIS[planetIndex] * cos(angle));
-    int planetY = static_cast<int>(SUN_Y + SEMI_MINOR_AXIS[planetIndex] * sin(angle));
-
-    // Draw the planet
-    setcolor(PLANET_COLORS[planetIndex]); // Change color for each planet
-    circle(planetX, planetY, 10); // Draw planet
-    floodfill(planetX, planetY, PLANET_COLORS[planetIndex]); // Fill planet
-}
-
-void erasePlanet(int planetIndex, float angle) {
-    // Calculate previous planet position using elliptical orbits
-    int planetX = static_cast<int>(SUN_X + SEMI_MAJOR_AXIS[planetIndex] * cos(angle));
-    int planetY = static_cast<int>(SUN_Y + SEMI_MINOR_AXIS[planetIndex] * sin(angle));
-
-    // Erase the planet by redrawing its last position with background color
-    setcolor(BLACK);
-    circle(planetX, planetY, 10); // Draw "over" the planet
-    floodfill(planetX, planetY, BLACK); // Fill "over" the planet
-}
-
-int main() {
-    // Initialize the graphics system
-    int gd = DETECT, gm;
-    initgraph(&gd, &gm, NULL); // Specify the path to BGI files if needed
-
-    // Draw static ellipses and the Sun once
-    drawEllipses();
-    drawSun();
-
-    float angles[NUM_PLANETS] = {0.0f}; // Initial angles for each planet
-
-    while (true) {
-        // Loop through each planet
-        for (int i = 0; i < NUM_PLANETS; ++i) {
-            // Erase the previous position of the planet
-            erasePlanet(i, angles[i]); 
-            
-            // Update angle for rotation
-            angles[i] += SPEED[i]; 
-            // Ensure angles wrap around
-            if (angles[i] > 2 * M_PI) angles[i] -= 2 * M_PI; 
-            
-            // Draw the planet at the new position
-            drawPlanet(i, angles[i]); 
-        }
-
-        // Pause for a bit to control the speed of the animation
-        std::this_thread::sleep_for(std::chrono::milliseconds(20)); // Adjust as necessary
-    }
-
-    // Close the graphics system (this won't be reached in this infinite loop)
-    closegraph();
-    return 0;
-}
-
